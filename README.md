@@ -22,7 +22,7 @@ API desenvolvida com **PostgreSQL** para gerenciar dados de alunos. Oferece rota
 
 1. Clone o repositório:
     ```bash
-    git clone https://github.com/SEU_USUARIO/api-postegresql.git
+    git clone https://github.com/andre-0303/api-postegresql.git
     ```
 2. Instale as dependências:
     ```bash

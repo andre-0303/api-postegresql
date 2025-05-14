@@ -1,10 +1,18 @@
 import express from "express";
 const app = express();
 import pool from "./db.js";
+import dotenv from "dotenv";
+import Joi from "joi";
 
-const PORT = 3000;
+dotenv.config();
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+
+const alunoSchema = Joi.object({
+  nome: Joi.string().min(2).max(100).required(),
+  idade: Joi.number().integer().min(0).max(120).required(),
+});
 
 app.get("/alunos", async (req, res) => {
   try {
@@ -16,7 +24,11 @@ app.get("/alunos", async (req, res) => {
 });
 
 app.post("/alunos", async (req, res) => {
+  const { error } = alunoSchema.validate(req.body);
+  if (error) return res.status(400).json({ error: error.details[0].message });
+
   const { nome, idade } = req.body;
+
   try {
     const result = await pool.query(
       "INSERT INTO alunos (nome, idade) VALUES ($1, $2) RETURNING *",
@@ -42,8 +54,18 @@ app.get("/alunos/:id", (req, res) => {
 });
 
 app.put("/alunos/:id", async (req, res) => {
-  const id = req.params.id;
+  const { id } = req.params;
+
+  // Validação do corpo da requisição
+  const { error } = alunoSchema.validate(req.body);
+  if (error) return res.status(400).json({ error: error.details[0].message });
+
   const { nome, idade } = req.body;
+
+  // Verificação se ID é numérico
+  if (isNaN(id)) {
+    return res.status(400).json({ error: "ID inválido" });
+  }
 
   try {
     const result = await pool.query(
@@ -57,7 +79,8 @@ app.put("/alunos/:id", async (req, res) => {
 
     res.json(result.rows[0]);
   } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("Erro ao atualizar aluno:", error);
+    res.status(500).json({ error: "Erro interno no servidor" });
   }
 });
 

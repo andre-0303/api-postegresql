@@ -9,6 +9,15 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
+pool.query('SELECT NOW()', (err, res) => {
+  if (err) {
+    console.error('Erro ao conectar no banco:', err);
+  } else {
+    console.log('Conectado ao banco, hora atual:', res.rows[0]);
+  }
+});
+
+
 const alunoSchema = Joi.object({
   nome: Joi.string().min(2).max(100).required(),
   idade: Joi.number().integer().min(0).max(120).required(),
